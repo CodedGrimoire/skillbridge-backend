@@ -46,6 +46,7 @@ model Skill {
   userSkills UserSkill[]
   roleSkills RoleSkill[]
   resources  LearningResource[]
+  jobSkills  JobSkill[]
 }
 
 model UserSkill {
@@ -120,14 +121,28 @@ model Job {
   company     String
   location    String
   description String?
-  skills      Json
   salary      String?
   source      String?
+  sourceUrl   String?
   datePosted  DateTime?
+  externalId  String?  @unique
+  skills      JobSkill[]
   createdAt   DateTime @default(now())
 
   @@index([title])
   @@index([company])
+}
+
+model JobSkill {
+  id        String @id @default(uuid())
+  job       Job    @relation(fields: [jobId], references: [id])
+  jobId     String
+  skill     Skill  @relation(fields: [skillId], references: [id])
+  skillId   String
+  createdAt DateTime @default(now())
+
+  @@unique([jobId, skillId])
+  @@index([skillId])
 }
 
 model CareerPath {
