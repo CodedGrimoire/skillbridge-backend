@@ -15,6 +15,7 @@ const marketRoutes = require('./routes/marketRoutes');
 const jobIngestionRoutes = require('./routes/jobIngestionRoutes');
 const simulationRoutes = require('./routes/simulationRoutes');
 const careerRoutes = require('./routes/careerRoutes');
+const trendRoutes = require('./routes/trendRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 const { prisma } = require('./config/db');
 
@@ -41,6 +42,7 @@ app.use('/api/jobs', jobIngestionRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/simulation', simulationRoutes);
 app.use('/api/career', careerRoutes);
+app.use('/api/trends', trendRoutes);
 
 // Error handling
 app.use(errorHandler);

@@ -7,7 +7,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "import:jobs": "node src/scripts/importJobs.js"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",

@@ -123,6 +123,7 @@ model Job {
   skills      Json
   salary      String?
   source      String?
+  datePosted  DateTime?
   createdAt   DateTime @default(now())
 
   @@index([title])
