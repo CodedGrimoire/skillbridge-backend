@@ -1,8 +1,9 @@
 /**
  * Compare user skills against role skills and compute matches/misses.
  * Expects arrays of objects: [{ id, name }]
+ * Optionally takes a demand map (skill -> demandScore) to enrich missing skills.
  */
-function analyzeSkillGap(userSkills, roleSkills) {
+function analyzeSkillGap(userSkills, roleSkills, demandMap = {}) {
   const userSet = new Set(userSkills.map((s) => s.name.toLowerCase()));
   const required = roleSkills.map((s) => s.name.toLowerCase());
 
@@ -13,9 +14,16 @@ function analyzeSkillGap(userSkills, roleSkills) {
     ? Math.round((matched.length / required.length) * 100)
     : 0;
 
+  const missingSkills = missing.map((s) => s.name);
+  const missingSkillsWithDemand = missing.map((s) => ({
+    skill: s.name,
+    demandScore: demandMap[s.name] || demandMap[s.name.toLowerCase()] || 0,
+  }));
+
   return {
     matchedSkills: matched.map((s) => s.name),
-    missingSkills: missing.map((s) => s.name),
+    missingSkills,
+    missingSkillsWithDemand,
     matchScore,
   };
 }

@@ -111,3 +111,18 @@ model LearningResource {
 
   @@index([skillId])
 }
+
+model Job {
+  id          String   @id @default(uuid())
+  title       String
+  company     String
+  location    String
+  description String?
+  skills      Json
+  salary      String?
+  source      String?
+  createdAt   DateTime @default(now())
+
+  @@index([title])
+  @@index([company])
+}
