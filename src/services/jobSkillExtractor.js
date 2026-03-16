@@ -15,4 +15,9 @@ async function extractSkillsFromJob(description = '') {
   return detected;
 }
 
-module.exports = { extractSkillsFromJob };
+// Alias for clarity in dataset parsing
+async function extractSkillsFromJobDescription(text = '') {
+  return extractSkillsFromJob(text);
+}
+
+module.exports = { extractSkillsFromJob, extractSkillsFromJobDescription };
