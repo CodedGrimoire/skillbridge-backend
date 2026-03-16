@@ -1,0 +1,122 @@
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
+
+const jobRoles = [
+  { title: 'Frontend Developer', description: 'Builds user-facing web interfaces' },
+  { title: 'Backend Developer', description: 'Builds server-side APIs and services' },
+  { title: 'Full Stack Developer', description: 'Delivers end-to-end web features' },
+  { title: 'Data Analyst', description: 'Analyzes data to generate insights' },
+  { title: 'Machine Learning Engineer', description: 'Builds and deploys ML models' },
+];
+
+const skills = [
+  'HTML',
+  'CSS',
+  'JavaScript',
+  'React',
+  'Next.js',
+  'Tailwind',
+  'Node.js',
+  'Express.js',
+  'REST API',
+  'PostgreSQL',
+  'Prisma',
+  'MongoDB',
+  'Docker',
+  'Git',
+  'Linux',
+  'Python',
+  'Machine Learning',
+  'Pandas',
+  'TensorFlow',
+];
+
+const roleSkillMappings = [
+  {
+    role: 'Frontend Developer',
+    skills: ['HTML', 'CSS', 'JavaScript', 'React', 'Next.js', 'Tailwind'],
+  },
+  {
+    role: 'Backend Developer',
+    skills: ['Node.js', 'Express.js', 'REST API', 'PostgreSQL', 'Prisma', 'Docker'],
+  },
+  {
+    role: 'Full Stack Developer',
+    skills: ['React', 'Node.js', 'PostgreSQL', 'Prisma', 'REST API', 'Docker', 'Git'],
+  },
+  {
+    role: 'Data Analyst',
+    skills: ['Python', 'Pandas', 'PostgreSQL', 'Machine Learning'],
+  },
+  {
+    role: 'Machine Learning Engineer',
+    skills: ['Python', 'Machine Learning', 'TensorFlow', 'Pandas', 'Docker'],
+  },
+];
+
+async function seed() {
+  console.log('Seeding Job Roles...');
+  const roleMap = {};
+  for (const role of jobRoles) {
+    const record = await prisma.jobRole.upsert({
+      where: { title: role.title },
+      update: { description: role.description },
+      create: { title: role.title, description: role.description },
+    });
+    roleMap[role.title] = record;
+  }
+
+  console.log('Seeding Skills...');
+  const skillMap = {};
+  for (const name of skills) {
+    const record = await prisma.skill.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+    skillMap[name] = record;
+  }
+
+  console.log('Seeding RoleSkill mappings...');
+  for (const mapping of roleSkillMappings) {
+    const role = roleMap[mapping.role];
+    if (!role) {
+      console.warn(`Skipping mapping for missing role: ${mapping.role}`);
+      continue;
+    }
+
+    for (const skillName of mapping.skills) {
+      const skill = skillMap[skillName];
+      if (!skill) {
+        console.warn(`Skipping mapping for missing skill: ${skillName}`);
+        continue;
+      }
+
+      await prisma.roleSkill.upsert({
+        where: {
+          roleId_skillId: {
+            roleId: role.id,
+            skillId: skill.id,
+          },
+        },
+        update: { importanceLevel: 3 },
+        create: {
+          roleId: role.id,
+          skillId: skill.id,
+          importanceLevel: 3,
+        },
+      });
+    }
+  }
+}
+
+seed()
+  .then(() => console.log('Seeding complete.'))
+  .catch((err) => {
+    console.error('Seeding failed:', err);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
