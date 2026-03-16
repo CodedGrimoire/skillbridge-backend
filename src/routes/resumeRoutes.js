@@ -1,9 +1,9 @@
 const router = require('express').Router();
 const { uploadResume, getResumeById } = require('../controllers/resumeController');
-const { authenticate } = require('../middleware/authMiddleware');
+const { authenticateToken } = require('../middleware/authMiddleware');
 const { uploadMiddleware } = require('../middleware/uploadMiddleware');
 
-router.post('/upload', authenticate, uploadMiddleware, uploadResume);
-router.get('/:id', authenticate, getResumeById);
+router.post('/upload', authenticateToken, uploadMiddleware, uploadResume);
+router.get('/:id', authenticateToken, getResumeById);
 
 module.exports = router;

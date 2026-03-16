@@ -5,15 +5,15 @@ const {
   updateSkill,
   deleteSkill,
 } = require('../controllers/skillController');
-const { authenticate } = require('../middleware/authMiddleware');
+const { authenticateToken } = require('../middleware/authMiddleware');
 const { requireAdmin } = require('../middleware/roleMiddleware');
 
 // Public read
 router.get('/', getSkills);
 
 // Admin write
-router.post('/', authenticate, requireAdmin, createSkill);
-router.put('/:id', authenticate, requireAdmin, updateSkill);
-router.delete('/:id', authenticate, requireAdmin, deleteSkill);
+router.post('/', authenticateToken, requireAdmin, createSkill);
+router.put('/:id', authenticateToken, requireAdmin, updateSkill);
+router.delete('/:id', authenticateToken, requireAdmin, deleteSkill);
 
 module.exports = router;

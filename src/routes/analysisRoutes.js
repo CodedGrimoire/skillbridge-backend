@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const { runAnalysis, getHistory } = require('../controllers/analysisController');
-const { authenticate } = require('../middleware/authMiddleware');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
-router.post('/run', authenticate, runAnalysis);
-router.get('/history', authenticate, getHistory);
+router.post('/run', authenticateToken, runAnalysis);
+router.get('/history', authenticateToken, getHistory);
 
 module.exports = router;

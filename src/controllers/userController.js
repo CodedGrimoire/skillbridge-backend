@@ -11,7 +11,7 @@ const getUsers = async (_req, res, next) => {
 
 const getUserById = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = req.params.id;
     const user = await prisma.user.findUnique({ where: { id }, select: { id: true, email: true, name: true, createdAt: true } });
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
