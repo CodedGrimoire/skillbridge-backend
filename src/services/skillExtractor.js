@@ -1,10 +1,16 @@
-// Placeholder skill extractor. Replace with NLP/LLM powered extractor later.
-const SKILL_KEYWORDS = ['javascript', 'node', 'express', 'python', 'sql', 'aws', 'react'];
+const { prisma } = require('../config/db');
 
-const extractSkillsFromText = async (text) => {
+/**
+ * Naive skill detector: checks if skill names appear in the text.
+ * Returns a list of { id, name } for skills that are present.
+ */
+async function extractSkillsFromText(text) {
   if (!text) return [];
+
   const lower = text.toLowerCase();
-  return SKILL_KEYWORDS.filter((kw) => lower.includes(kw));
-};
+  const skills = await prisma.skill.findMany({ select: { id: true, name: true } });
+
+  return skills.filter((skill) => lower.includes(skill.name.toLowerCase()));
+}
 
 module.exports = { extractSkillsFromText };

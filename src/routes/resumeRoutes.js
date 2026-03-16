@@ -1,12 +1,9 @@
 const router = require('express').Router();
-const multer = require('multer');
 const { uploadResume, getResumeById } = require('../controllers/resumeController');
 const { authenticate } = require('../middleware/authMiddleware');
+const { uploadMiddleware } = require('../middleware/uploadMiddleware');
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
-router.post('/upload', authenticate, upload.single('file'), uploadResume);
+router.post('/upload', authenticate, uploadMiddleware, uploadResume);
 router.get('/:id', authenticate, getResumeById);
 
 module.exports = router;

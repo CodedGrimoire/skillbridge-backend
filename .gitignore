@@ -9,3 +9,4 @@ pnpm-debug.log*
 dist
 coverage
 .prisma
+uploads
