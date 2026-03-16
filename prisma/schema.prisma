@@ -67,6 +67,8 @@ model JobRole {
   createdAt   DateTime    @default(now())
   roleSkills  RoleSkill[]
   analyses    Analysis[]
+  nextPaths   CareerPath[] @relation("FromRole")
+  prevPaths   CareerPath[] @relation("ToRole")
 }
 
 model RoleSkill {
@@ -125,4 +127,16 @@ model Job {
 
   @@index([title])
   @@index([company])
+}
+
+model CareerPath {
+  id         String   @id @default(uuid())
+  fromRole   JobRole  @relation("FromRole", fields: [fromRoleId], references: [id])
+  fromRoleId String
+  toRole     JobRole  @relation("ToRole", fields: [toRoleId], references: [id])
+  toRoleId   String
+  createdAt  DateTime @default(now())
+
+  @@index([fromRoleId])
+  @@index([toRoleId])
 }
