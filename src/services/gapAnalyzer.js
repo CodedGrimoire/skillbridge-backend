@@ -1,17 +1,23 @@
-// Compares user skills with role skills and returns missing + matching sets.
-const analyzeGaps = (userSkills, roleSkills) => {
-  const userSet = new Set(userSkills.map((s) => s.toLowerCase ? s.toLowerCase() : s.name.toLowerCase()));
+/**
+ * Compare user skills against role skills and compute matches/misses.
+ * Expects arrays of objects: [{ id, name }]
+ */
+function analyzeSkillGap(userSkills, roleSkills) {
+  const userSet = new Set(userSkills.map((s) => s.name.toLowerCase()));
+  const required = roleSkills.map((s) => s.name.toLowerCase());
 
-  const required = roleSkills.map((rs) => ({ name: rs.name.toLowerCase(), weight: rs.weight || 1 }));
+  const matched = roleSkills.filter((s) => userSet.has(s.name.toLowerCase()));
+  const missing = roleSkills.filter((s) => !userSet.has(s.name.toLowerCase()));
 
-  const missing = required.filter((rs) => !userSet.has(rs.name));
-  const matched = required.filter((rs) => userSet.has(rs.name));
+  const matchScore = required.length
+    ? Math.round((matched.length / required.length) * 100)
+    : 0;
 
   return {
-    matched,
-    missing,
-    coverage: required.length ? matched.length / required.length : 0,
+    matchedSkills: matched.map((s) => s.name),
+    missingSkills: missing.map((s) => s.name),
+    matchScore,
   };
-};
+}
 
-module.exports = { analyzeGaps };
+module.exports = { analyzeSkillGap };
