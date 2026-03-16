@@ -67,8 +67,6 @@ model JobRole {
   createdAt   DateTime    @default(now())
   roleSkills  RoleSkill[]
   analyses    Analysis[]
-
-  @@unique([title])
 }
 
 model RoleSkill {

@@ -59,11 +59,13 @@ async function seed() {
   console.log('Seeding Job Roles...');
   const roleMap = {};
   for (const role of jobRoles) {
-    const record = await prisma.jobRole.upsert({
-      where: { title: role.title },
-      update: { description: role.description },
-      create: { title: role.title, description: role.description },
-    });
+    const existing = await prisma.jobRole.findFirst({ where: { title: role.title } });
+    const record = existing
+      ? await prisma.jobRole.update({
+          where: { id: existing.id },
+          data: { description: role.description },
+        })
+      : await prisma.jobRole.create({ data: { title: role.title, description: role.description } });
     roleMap[role.title] = record;
   }
 
