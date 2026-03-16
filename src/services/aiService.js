@@ -5,7 +5,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 /**
  * Generate AI-powered recommendations for the user's skill gaps.
  */
-const generateRecommendations = async ({ matchedSkills, missingSkills, roleTitle }) => {
+const generateRecommendations = async ({ matchedSkills, missingSkills, roleTitle, plannedSkills }) => {
   if (!process.env.GROQ_API_KEY) {
     return 'AI recommendations unavailable (GROQ_API_KEY missing).';
   }
@@ -18,6 +18,9 @@ ${missingSkills.length ? missingSkills.join(', ') : 'None'}
 
 Target Role:
 ${roleTitle}
+
+User plans to learn:
+${plannedSkills && plannedSkills.length ? plannedSkills.join(', ') : 'None'}
 
 Generate:
 1. Skill gap explanation
