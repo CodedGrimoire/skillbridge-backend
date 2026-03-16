@@ -2,6 +2,7 @@ const { prisma } = require('../config/db');
 const { analyzeSkillGap } = require('../services/gapAnalyzer');
 const { generateRecommendations } = require('../services/aiService');
 const { getSkillDemand } = require('../services/marketAnalyzer');
+const { calculateSkillROI } = require('../services/skillRoiEngine');
 
 /**
  * Run skill gap analysis for a user's resume against a chosen job role.
@@ -45,7 +46,12 @@ const runAnalysis = async (req, res, next) => {
 
     const detectedUserSkills = userSkills.map((us) => ({ id: us.skill.id, name: us.skill.name }));
     const demandMap = await getSkillDemand();
-    const gapResult = analyzeSkillGap(detectedUserSkills, roleSkills, demandMap);
+    const gapResult = analyzeSkillGap(
+      detectedUserSkills,
+      roleSkills.map((r) => ({ name: r.name, importanceLevel: r.importanceLevel })),
+      demandMap,
+      calculateSkillROI
+    );
 
     const recommendations = await generateRecommendations({
       matchedSkills: gapResult.matchedSkills,
@@ -76,6 +82,7 @@ const runAnalysis = async (req, res, next) => {
       matchedSkills: gapResult.matchedSkills,
       missingSkills: gapResult.missingSkills,
       missingSkillsWithDemand: gapResult.missingSkillsWithDemand,
+      recommendedNextSkills: gapResult.recommendedNextSkills,
       recommendations,
       analysisId: analysis.id,
     });

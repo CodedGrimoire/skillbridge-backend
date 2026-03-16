@@ -3,7 +3,7 @@
  * Expects arrays of objects: [{ id, name }]
  * Optionally takes a demand map (skill -> demandScore) to enrich missing skills.
  */
-function analyzeSkillGap(userSkills, roleSkills, demandMap = {}) {
+function analyzeSkillGap(userSkills, roleSkills, demandMap = {}, roiFn) {
   const userSet = new Set(userSkills.map((s) => s.name.toLowerCase()));
   const required = roleSkills.map((s) => s.name.toLowerCase());
 
@@ -20,10 +20,21 @@ function analyzeSkillGap(userSkills, roleSkills, demandMap = {}) {
     demandScore: demandMap[s.name] || demandMap[s.name.toLowerCase()] || 0,
   }));
 
+  let recommendedNextSkills = [];
+  if (roiFn) {
+    recommendedNextSkills = roiFn(
+      missing.map((s) => ({
+        skill: s.name,
+        importanceLevel: s.importanceLevel || 1,
+      }))
+    );
+  }
+
   return {
     matchedSkills: matched.map((s) => s.name),
     missingSkills,
     missingSkillsWithDemand,
+    recommendedNextSkills,
     matchScore,
   };
 }
