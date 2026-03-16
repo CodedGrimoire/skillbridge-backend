@@ -1,8 +1,19 @@
 const router = require('express').Router();
-const { getSkills, createSkill } = require('../controllers/skillController');
+const {
+  createSkill,
+  getSkills,
+  updateSkill,
+  deleteSkill,
+} = require('../controllers/skillController');
 const { authenticate } = require('../middleware/authMiddleware');
+const { requireAdmin } = require('../middleware/roleMiddleware');
 
-router.get('/', authenticate, getSkills);
-router.post('/', authenticate, createSkill);
+// Public read
+router.get('/', getSkills);
+
+// Admin write
+router.post('/', authenticate, requireAdmin, createSkill);
+router.put('/:id', authenticate, requireAdmin, updateSkill);
+router.delete('/:id', authenticate, requireAdmin, deleteSkill);
 
 module.exports = router;
