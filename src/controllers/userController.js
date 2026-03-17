@@ -32,4 +32,46 @@ const getMySkills = async (req, res, next) => {
   }
 };
 
-module.exports = { getUsers, getUserById, getMySkills };
+const getMe = async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        resumeUrl: true,
+        linkedinUrl: true,
+        githubUrl: true,
+        portfolioUrl: true,
+        createdAt: true,
+      },
+    });
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateMyLinks = async (req, res, next) => {
+  try {
+    const { resumeUrl, linkedinUrl, githubUrl, portfolioUrl } = req.body || {};
+    const updated = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { resumeUrl, linkedinUrl, githubUrl, portfolioUrl },
+      select: {
+        id: true,
+        resumeUrl: true,
+        linkedinUrl: true,
+        githubUrl: true,
+        portfolioUrl: true,
+      },
+    });
+    res.json(updated);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getUsers, getUserById, getMySkills, getMe, updateMyLinks };

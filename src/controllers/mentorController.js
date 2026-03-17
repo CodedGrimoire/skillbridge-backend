@@ -74,12 +74,25 @@ const deleteUser = async (req, res, next) => {
 const getUserSkillProfile = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        resumeUrl: true,
+        linkedinUrl: true,
+        githubUrl: true,
+        portfolioUrl: true,
+      },
+    });
     const skills = await prisma.userSkill.findMany({
       where: { userId: id },
       include: { skill: true },
     });
     const missing = await prisma.missingSkill.findMany({ where: { userId: id } });
     res.json({
+      user,
       skills: skills.map((s) => s.skill.name),
       missingSkills: missing,
     });
@@ -125,35 +138,6 @@ const listResumeComments = async (req, res, next) => {
       include: { mentor: { select: { id: true, name: true } } },
     });
     res.json(comments);
-  } catch (err) {
-  next(err);
- }
-};
-
-const upsertMentorProfile = async (req, res, next) => {
-  try {
-    const { title, bio, rating } = req.body || {};
-    const data = {
-      title,
-      bio,
-      ...(rating ? { rating: Number(rating) } : {}),
-      reviewsCount: { increment: 0 },
-    };
-    const profile = await prisma.mentorProfile.upsert({
-      where: { userId: req.user.id },
-      update: data,
-      create: { userId: req.user.id, title, bio, rating: rating ? Number(rating) : undefined },
-    });
-    res.json(profile);
-  } catch (err) {
-    next(err);
-  }
-};
-
-const getMentorProfile = async (req, res, next) => {
-  try {
-    const profile = await prisma.mentorProfile.findUnique({ where: { userId: req.user.id } });
-    res.json(profile);
   } catch (err) {
   next(err);
  }
@@ -239,6 +223,70 @@ const listReviews = async (req, res, next) => {
   }
 };
 
+const submitAssessment = async (req, res, next) => {
+  try {
+    const { userId, resumeRating, linkedinRating, githubRating, portfolioRating, comment } = req.body || {};
+    if (!userId) return res.status(400).json({ message: 'userId required' });
+    const assessment = await prisma.mentorAssessment.upsert({
+      where: { mentorId_userId: { mentorId: req.user.id, userId } },
+      update: { resumeRating, linkedinRating, githubRating, portfolioRating, comment },
+      create: { userId, mentorId: req.user.id, resumeRating, linkedinRating, githubRating, portfolioRating, comment },
+    });
+    res.status(201).json(assessment);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const listAssessmentsForUser = async (req, res, next) => {
+  try {
+    const { id } = req.params; // userId
+    const assessments = await prisma.mentorAssessment.findMany({
+      where: { userId: id },
+      orderBy: { createdAt: 'desc' },
+      include: { mentor: { select: { id: true, name: true } } },
+    });
+    res.json(assessments);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const createMeeting = async (req, res, next) => {
+  try {
+    const { menteeId, scheduledAt, meetLink, note } = req.body || {};
+    if (!menteeId || !scheduledAt || !meetLink) {
+      return res.status(400).json({ message: 'menteeId, scheduledAt, meetLink required' });
+    }
+    const meeting = await prisma.mentorMeeting.create({
+      data: {
+        mentorId: req.user.id,
+        menteeId,
+        scheduledAt: new Date(scheduledAt),
+        meetLink,
+        note,
+      },
+    });
+    res.status(201).json(meeting);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const listMeetings = async (req, res, next) => {
+  try {
+    const meetings = await prisma.mentorMeeting.findMany({
+      where: {
+        OR: [{ mentorId: req.user.id }, { menteeId: req.user.id }],
+      },
+      orderBy: { scheduledAt: 'desc' },
+    });
+    res.json(meetings);
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   listMentors,
   createRequest,
@@ -253,4 +301,8 @@ module.exports = {
   getMentorProfile,
   submitReview,
   listReviews,
+  submitAssessment,
+  listAssessmentsForUser,
+  createMeeting,
+  listMeetings,
 };

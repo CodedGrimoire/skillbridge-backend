@@ -14,6 +14,10 @@ const {
   getMentorProfile,
   submitReview,
   listReviews,
+  submitAssessment,
+  listAssessmentsForUser,
+  createMeeting,
+  listMeetings,
 } = require('../controllers/mentorController');
 
 router.get('/mentors', authenticateToken, listMentors);
@@ -33,5 +37,11 @@ router.put('/profile', authenticateToken, authorizeRoles('ADMIN'), upsertMentorP
 
 router.post('/reviews', authenticateToken, submitReview);
 router.get('/reviews/:mentorId', authenticateToken, listReviews);
+
+router.post('/assessments', authenticateToken, authorizeRoles('ADMIN'), submitAssessment);
+router.get('/assessments/:id', authenticateToken, authorizeRoles('ADMIN'), listAssessmentsForUser);
+
+router.post('/meetings', authenticateToken, authorizeRoles('ADMIN'), createMeeting);
+router.get('/meetings', authenticateToken, listMeetings);
 
 module.exports = router;

@@ -18,6 +18,10 @@ model User {
   email              String               @unique
   password           String
   role               Role                 @default(USER)
+  resumeUrl          String?
+  linkedinUrl        String?
+  githubUrl          String?
+  portfolioUrl       String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   resumes            Resume[]
@@ -31,6 +35,10 @@ model User {
   mentorProfile      MentorProfile?
   mentorReviews      MentorReview[]       @relation("MentorReviewed")
   writtenReviews     MentorReview[]       @relation("UserReviews")
+  mentorAssessments  MentorAssessment[]   @relation("AssessedUser")
+  assessmentsGiven   MentorAssessment[]   @relation("Assessor")
+  mentorMeetings     MentorMeeting[]      @relation("MentorMeetings")
+  menteeMeetings     MentorMeeting[]      @relation("MenteeMeetings")
 }
 
 model Resume {
@@ -179,33 +187,73 @@ model ResumeComment {
 }
 
 model MentorProfile {
-  id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id])
-  userId       String   @unique
+  id           String         @id @default(uuid())
+  user         User           @relation(fields: [userId], references: [id])
+  userId       String         @unique
   title        String?
   bio          String?
-  rating       Float    @default(5)
-  reviewsCount Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  rating       Float          @default(5)
+  reviewsCount Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   reviews      MentorReview[] @relation("ProfileReviews")
 }
 
 model MentorReview {
-  id        String   @id @default(uuid())
-  mentor    User     @relation("MentorReviewed", fields: [mentorId], references: [id])
+  id        String        @id @default(uuid())
+  mentor    User          @relation("MentorReviewed", fields: [mentorId], references: [id])
   mentorId  String
-  user      User     @relation("UserReviews", fields: [userId], references: [id])
+  user      User          @relation("UserReviews", fields: [userId], references: [id])
   userId    String
   profile   MentorProfile @relation("ProfileReviews", fields: [profileId], references: [id])
   profileId String
   rating    Int
   comment   String?
-  createdAt DateTime @default(now())
+  createdAt DateTime      @default(now())
 
   @@unique([mentorId, userId])
   @@index([mentorId])
   @@index([userId])
+}
+
+model MentorAssessment {
+  id              String   @id @default(uuid())
+  user            User     @relation("AssessedUser", fields: [userId], references: [id])
+  userId          String
+  mentor          User     @relation("Assessor", fields: [mentorId], references: [id])
+  mentorId        String
+  resumeRating    Int?
+  linkedinRating  Int?
+  githubRating    Int?
+  portfolioRating Int?
+  comment         String?
+  createdAt       DateTime @default(now())
+
+  @@unique([mentorId, userId])
+  @@index([userId])
+  @@index([mentorId])
+}
+
+enum MeetingStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+model MentorMeeting {
+  id          String        @id @default(uuid())
+  mentor      User          @relation("MentorMeetings", fields: [mentorId], references: [id])
+  mentorId    String
+  mentee      User          @relation("MenteeMeetings", fields: [menteeId], references: [id])
+  menteeId    String
+  scheduledAt DateTime
+  meetLink    String
+  note        String?
+  status      MeetingStatus @default(pending)
+  createdAt   DateTime      @default(now())
+
+  @@index([mentorId])
+  @@index([menteeId])
 }
 
 model LearningResource {
