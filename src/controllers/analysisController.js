@@ -59,12 +59,6 @@ const runAnalysis = async (req, res, next) => {
       roleTitle: role.title,
     });
 
-    if (!recommendations) {
-      return res
-        .status(503)
-        .json({ message: 'AI recommendation service unavailable. Please try again later.' });
-    }
-
     const analysis = await prisma.analysis.create({
       data: {
         userId,

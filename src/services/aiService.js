@@ -30,7 +30,7 @@ Keep it concise and actionable.`;
 
   try {
     const response = await groq.chat.completions.create({
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: 'You are a concise, practical career coach.' },
         { role: 'user', content: prompt },
@@ -42,7 +42,7 @@ Keep it concise and actionable.`;
     return response.choices?.[0]?.message?.content || 'No AI response generated.';
   } catch (err) {
     console.error('Groq API error:', err.message);
-    return null;
+    return 'AI recommendations unavailable right now. Here is a simple next-step list: focus on the missing skills above and build a small project to practice them.';
   }
 };
 

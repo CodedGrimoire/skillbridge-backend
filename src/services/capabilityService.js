@@ -39,7 +39,7 @@ ${resumeText?.slice(0, 4000) || 'No text provided'}
 `;
 
   const response = await groq.chat.completions.create({
-    model: 'mixtral-8x7b-32768',
+    model: 'llama-3.3-70b-versatile',
     messages: [
       { role: 'system', content: 'Respond with strict JSON only, no prose.' },
       { role: 'user', content: prompt },
@@ -49,7 +49,23 @@ ${resumeText?.slice(0, 4000) || 'No text provided'}
   });
 
   const raw = response.choices?.[0]?.message?.content || '{}';
-  return JSON.parse(raw);
+  const cleaned = cleanJsonBlock(raw);
+  return JSON.parse(cleaned);
+}
+
+function cleanJsonBlock(text) {
+  let t = text.trim();
+  if (t.startsWith('```')) {
+    // remove ```json ... ``` fences
+    t = t.replace(/```json/i, '').replace(/```/g, '').trim();
+  }
+  // If still extra text, attempt to extract first JSON object substring
+  const first = t.indexOf('{');
+  const last = t.lastIndexOf('}');
+  if (first !== -1 && last !== -1 && last > first) {
+    t = t.slice(first, last + 1);
+  }
+  return t;
 }
 
 async function createCapabilityAnalysis(userId) {

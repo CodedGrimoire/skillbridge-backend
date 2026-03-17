@@ -22,3 +22,11 @@ const authenticateToken = async (req, res, next) => {
 };
 
 module.exports = { authenticateToken };
+const authorizeRoles = (...allowed) => (req, res, next) => {
+  if (!req.user || !allowed.includes(req.user.role)) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+  next();
+};
+
+module.exports = { authenticateToken, authorizeRoles };

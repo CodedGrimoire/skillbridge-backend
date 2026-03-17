@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 
@@ -110,6 +111,24 @@ async function seed() {
         },
       });
     }
+  }
+
+  console.log('Seeding Users (mentors and jobseekers)...');
+  const users = [
+    { name: 'Maya Mentor', email: 'mentor1@example.com', role: 'ADMIN' },
+    { name: 'Noah Mentor', email: 'mentor2@example.com', role: 'ADMIN' },
+    { name: 'Ava Jobseeker', email: 'user1@example.com', role: 'USER' },
+    { name: 'Liam Jobseeker', email: 'user2@example.com', role: 'USER' },
+    { name: 'Olivia Jobseeker', email: 'user3@example.com', role: 'USER' },
+    { name: 'Ethan Jobseeker', email: 'user4@example.com', role: 'USER' },
+  ];
+  const passwordHash = await bcrypt.hash('Passw0rd!', 10);
+  for (const u of users) {
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: { name: u.name, role: u.role },
+      create: { name: u.name, email: u.email, password: passwordHash, role: u.role },
+    });
   }
 }
 
