@@ -20,4 +20,16 @@ const getUserById = async (req, res, next) => {
   }
 };
 
-module.exports = { getUsers, getUserById };
+const getMySkills = async (req, res, next) => {
+  try {
+    const skills = await prisma.userSkill.findMany({
+      where: { userId: req.user.id },
+      include: { skill: true },
+    });
+    res.json(skills.map((s) => s.skill.name));
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getUsers, getUserById, getMySkills };

@@ -103,6 +103,45 @@ model Analysis {
   @@index([roleId])
 }
 
+enum MissingSkillStatus {
+  pending
+  in_progress
+  done
+}
+
+model CapabilityAnalysis {
+  id             String   @id @default(uuid())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
+  resume         Resume?  @relation(fields: [resumeId], references: [id])
+  resumeId       String?
+  primaryRole    String
+  score          Float
+  suggestedRoles Json
+  userSkills     Json
+  missingSkills  Json
+  missingSoftSkills Json
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([resumeId])
+}
+
+model MissingSkill {
+  id         String            @id @default(uuid())
+  user       User              @relation(fields: [userId], references: [id])
+  userId     String
+  name       String
+  status     MissingSkillStatus @default(pending)
+  analysis   CapabilityAnalysis? @relation(fields: [analysisId], references: [id])
+  analysisId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([analysisId])
+}
+
 model LearningResource {
   id        String   @id @default(uuid())
   skill     Skill    @relation(fields: [skillId], references: [id])

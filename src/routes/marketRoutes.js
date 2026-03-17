@@ -1,9 +1,9 @@
 const router = require('express').Router();
-const { trendingSkills, skillDemand, trending, roleDemand } = require('../controllers/marketController');
+const { topSkills, roleSkills, trendingSkills } = require('../controllers/marketController');
 
+// Skill demand endpoints
+router.get('/top-skills', topSkills);
+router.get('/role-skills', roleSkills);
 router.get('/trending-skills', trendingSkills);
-router.get('/skill-demand', skillDemand);
-router.get('/trending', trending);
-router.get('/role-demand/:roleId', roleDemand);
 
 module.exports = router;

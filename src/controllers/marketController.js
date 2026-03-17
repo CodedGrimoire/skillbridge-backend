@@ -1,59 +1,41 @@
-const { getTrendingSkills, getSkillDemand } = require('../services/marketAnalyzer');
-const { calculateSkillDemand } = require('../services/marketStatsService');
-const { prisma } = require('../config/db');
+const {
+  getTopSkills,
+  getTopSkillsByRole,
+  getTrendingSkills,
+} = require('../services/skillDemandService');
 
-// Return top trending skills based on job postings frequency
-const trendingSkills = async (_req, res, next) => {
+// GET /api/market/top-skills
+const topSkills = async (req, res, next) => {
   try {
-    const trending = await getTrendingSkills();
-    res.json({ trendingSkills: trending });
+    const limit = req.query.limit;
+    const skills = await getTopSkills(limit);
+    res.json({ skills });
   } catch (err) {
     next(err);
   }
 };
 
-// Return raw demand map: skill -> frequency
-const skillDemand = async (_req, res, next) => {
+// GET /api/market/role-skills?role=software engineer
+const roleSkills = async (req, res, next) => {
   try {
-    const demand = await getSkillDemand();
-    res.json({ skillDemand: demand });
+    const { role } = req.query;
+    if (!role) return res.status(400).json({ message: 'role query param is required' });
+    const skills = await getTopSkillsByRole(role);
+    res.json({ role, topSkills: skills.map((s) => s.name) });
   } catch (err) {
     next(err);
   }
 };
 
-module.exports = { trendingSkills, skillDemand };
-
-// GET /api/market/trending (alias)
-const trending = async (_req, res, next) => {
+// GET /api/market/trending-skills
+const trendingSkills = async (req, res, next) => {
   try {
-    const data = await getTrendingSkills();
-    res.json({ trendingSkills: data });
+    const limit = req.query.limit;
+    const skills = await getTrendingSkills(limit);
+    res.json({ skills });
   } catch (err) {
     next(err);
   }
 };
 
-// GET /api/market/role-demand/:roleId
-const roleDemand = async (req, res, next) => {
-  try {
-    const { roleId } = req.params;
-    const role = await prisma.jobRole.findUnique({
-      where: { id: roleId },
-      include: { roleSkills: { include: { skill: true } } },
-    });
-    if (!role) return res.status(404).json({ message: 'Role not found' });
-
-    const demand = await calculateSkillDemand();
-    const roleSkillNames = role.roleSkills.map((r) => r.skill.name);
-    const filtered = roleSkillNames
-      .map((name) => ({ skill: name, demand: demand[name] || demand[name.toLowerCase()] || 0 }))
-      .sort((a, b) => b.demand - a.demand);
-
-    res.json({ roleDemand: filtered });
-  } catch (err) {
-    next(err);
-  }
-};
-
-module.exports = { trendingSkills, skillDemand, trending, roleDemand };
+module.exports = { topSkills, roleSkills, trendingSkills };
