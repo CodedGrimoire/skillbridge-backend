@@ -30,17 +30,18 @@ const getUserSkills = async (req, res, next) => {
 // Get full analysis history
 const getUserAnalyses = async (req, res, next) => {
   try {
-    const analyses = await prisma.analysis.findMany({
+    const analyses = await prisma.capabilityAnalysis.findMany({
       where: { userId: req.user.id },
-      include: { role: true },
       orderBy: { createdAt: 'desc' },
     });
 
     res.json({
       analyses: analyses.map((a) => ({
-        role: a.role?.title ?? 'Unknown role',
-        matchScore: a.matchScore,
+        role: a.primaryRole ?? 'Unknown role',
+        matchScore: a.score,
         createdAt: a.createdAt,
+        missingSkills: a.missingSkills,
+        id: a.id,
       })),
     });
   } catch (err) {
@@ -51,9 +52,8 @@ const getUserAnalyses = async (req, res, next) => {
 // Get latest analysis with details
 const getLatestAnalysis = async (req, res, next) => {
   try {
-    const analysis = await prisma.analysis.findFirst({
+    const analysis = await prisma.capabilityAnalysis.findFirst({
       where: { userId: req.user.id },
-      include: { role: true },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -63,11 +63,11 @@ const getLatestAnalysis = async (req, res, next) => {
 
     res.json({
       analysis: {
-        role: analysis.role?.title ?? 'Unknown role',
-        matchScore: analysis.matchScore,
-        matchedSkills: analysis.matchedSkills ?? [],
+        role: analysis.primaryRole ?? 'Unknown role',
+        matchScore: analysis.score,
+        matchedSkills: analysis.userSkills ?? [],
         missingSkills: analysis.missingSkills ?? [],
-        aiRecommendations: analysis.aiRecommendations,
+        aiRecommendations: '', // capability analyses don't store this yet
         createdAt: analysis.createdAt,
       },
     });
@@ -79,7 +79,7 @@ const getLatestAnalysis = async (req, res, next) => {
 // Get learning resources for missing skills from latest analysis
 const getLearningResources = async (req, res, next) => {
   try {
-    const latest = await prisma.analysis.findFirst({
+    const latest = await prisma.capabilityAnalysis.findFirst({
       where: { userId: req.user.id },
       orderBy: { createdAt: 'desc' },
     });
