@@ -13,36 +13,46 @@ enum Role {
 }
 
 model User {
-  id         String       @id @default(uuid())
-  name       String
-  email      String       @unique
-  password   String
-  role       Role         @default(USER)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  resumes    Resume[]
-  analyses   Analysis[]
-  userSkills UserSkill[]
+  id                 String               @id @default(uuid())
+  name               String
+  email              String               @unique
+  password           String
+  role               Role                 @default(USER)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  resumes            Resume[]
+  analyses           Analysis[]
+  userSkills         UserSkill[]
+  capabilityAnalyses CapabilityAnalysis[]
+  missingSkills      MissingSkill[]
+  mentorRequests     MentorRequest[]      @relation("UserMentorRequests")
+  mentees            MentorRequest[]      @relation("MentorAssignments")
+  resumeComments     ResumeComment[]
+  mentorProfile      MentorProfile?
+  mentorReviews      MentorReview[]       @relation("MentorReviewed")
+  writtenReviews     MentorReview[]       @relation("UserReviews")
 }
 
 model Resume {
-  id            String     @id @default(uuid())
-  user          User       @relation(fields: [userId], references: [id])
-  userId        String
-  fileName      String
-  fileUrl       String
-  extractedText String?
-  createdAt     DateTime   @default(now())
-  analyses      Analysis[]
+  id                 String               @id @default(uuid())
+  user               User                 @relation(fields: [userId], references: [id])
+  userId             String
+  fileName           String
+  fileUrl            String
+  extractedText      String?
+  createdAt          DateTime             @default(now())
+  analyses           Analysis[]
+  capabilityAnalyses CapabilityAnalysis[]
+  comments           ResumeComment[]
 
   @@index([userId])
 }
 
 model Skill {
-  id        String       @id @default(uuid())
-  name      String       @unique
-  category  String?
-  createdAt DateTime     @default(now())
+  id         String             @id @default(uuid())
+  name       String             @unique
+  category   String?
+  createdAt  DateTime           @default(now())
   userSkills UserSkill[]
   roleSkills RoleSkill[]
   resources  LearningResource[]
@@ -62,10 +72,10 @@ model UserSkill {
 }
 
 model JobRole {
-  id          String      @id @default(uuid())
+  id          String       @id @default(uuid())
   title       String
   description String?
-  createdAt   DateTime    @default(now())
+  createdAt   DateTime     @default(now())
   roleSkills  RoleSkill[]
   analyses    Analysis[]
   nextPaths   CareerPath[] @relation("FromRole")
@@ -85,18 +95,18 @@ model RoleSkill {
 }
 
 model Analysis {
-  id               String    @id @default(uuid())
-  user             User      @relation(fields: [userId], references: [id])
-  userId           String
-  resume           Resume?   @relation(fields: [resumeId], references: [id])
-  resumeId         String?
-  role             JobRole?  @relation(fields: [roleId], references: [id])
-  roleId           String?
-  matchScore       Float?
-  matchedSkills    Json?
-  missingSkills    Json?
+  id                String   @id @default(uuid())
+  user              User     @relation(fields: [userId], references: [id])
+  userId            String
+  resume            Resume?  @relation(fields: [resumeId], references: [id])
+  resumeId          String?
+  role              JobRole? @relation(fields: [roleId], references: [id])
+  roleId            String?
+  matchScore        Float?
+  matchedSkills     Json?
+  missingSkills     Json?
   aiRecommendations String?
-  createdAt        DateTime  @default(now())
+  createdAt         DateTime @default(now())
 
   @@index([userId])
   @@index([resumeId])
@@ -110,36 +120,92 @@ enum MissingSkillStatus {
 }
 
 model CapabilityAnalysis {
-  id             String   @id @default(uuid())
-  user           User     @relation(fields: [userId], references: [id])
-  userId         String
-  resume         Resume?  @relation(fields: [resumeId], references: [id])
-  resumeId       String?
-  primaryRole    String
-  score          Float
-  suggestedRoles Json
-  userSkills     Json
-  missingSkills  Json
+  id                String         @id @default(uuid())
+  user              User           @relation(fields: [userId], references: [id])
+  userId            String
+  resume            Resume?        @relation(fields: [resumeId], references: [id])
+  resumeId          String?
+  primaryRole       String
+  score             Float
+  suggestedRoles    Json
+  userSkills        Json
+  missingSkills     Json
   missingSoftSkills Json
-  createdAt      DateTime @default(now())
+  createdAt         DateTime       @default(now())
+  missingSkillTodos MissingSkill[]
 
   @@index([userId])
   @@index([resumeId])
 }
 
 model MissingSkill {
-  id         String            @id @default(uuid())
-  user       User              @relation(fields: [userId], references: [id])
+  id         String              @id @default(uuid())
+  user       User                @relation(fields: [userId], references: [id])
   userId     String
   name       String
-  status     MissingSkillStatus @default(pending)
+  status     MissingSkillStatus  @default(pending)
   analysis   CapabilityAnalysis? @relation(fields: [analysisId], references: [id])
   analysisId String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
 
   @@index([userId])
   @@index([analysisId])
+}
+
+model MentorRequest {
+  id        String   @id @default(uuid())
+  user      User     @relation("UserMentorRequests", fields: [userId], references: [id])
+  userId    String
+  mentor    User     @relation("MentorAssignments", fields: [mentorId], references: [id])
+  mentorId  String
+  message   String?
+  status    String   @default("pending") // pending, accepted, denied
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ResumeComment {
+  id        String   @id @default(uuid())
+  resume    Resume   @relation(fields: [resumeId], references: [id])
+  resumeId  String
+  mentor    User     @relation(fields: [mentorId], references: [id])
+  mentorId  String
+  comment   String
+  createdAt DateTime @default(now())
+
+  @@index([resumeId])
+  @@index([mentorId])
+}
+
+model MentorProfile {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String   @unique
+  title        String?
+  bio          String?
+  rating       Float    @default(5)
+  reviewsCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  reviews      MentorReview[] @relation("ProfileReviews")
+}
+
+model MentorReview {
+  id        String   @id @default(uuid())
+  mentor    User     @relation("MentorReviewed", fields: [mentorId], references: [id])
+  mentorId  String
+  user      User     @relation("UserReviews", fields: [userId], references: [id])
+  userId    String
+  profile   MentorProfile @relation("ProfileReviews", fields: [profileId], references: [id])
+  profileId String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@unique([mentorId, userId])
+  @@index([mentorId])
+  @@index([userId])
 }
 
 model LearningResource {
@@ -155,7 +221,7 @@ model LearningResource {
 }
 
 model Job {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   title       String
   company     String
   location    String
@@ -164,19 +230,19 @@ model Job {
   source      String?
   sourceUrl   String?
   datePosted  DateTime?
-  externalId  String?  @unique
+  externalId  String?    @unique
   skills      JobSkill[]
-  createdAt   DateTime @default(now())
+  createdAt   DateTime   @default(now())
 
   @@index([title])
   @@index([company])
 }
 
 model JobSkill {
-  id        String @id @default(uuid())
-  job       Job    @relation(fields: [jobId], references: [id])
+  id        String   @id @default(uuid())
+  job       Job      @relation(fields: [jobId], references: [id])
   jobId     String
-  skill     Skill  @relation(fields: [skillId], references: [id])
+  skill     Skill    @relation(fields: [skillId], references: [id])
   skillId   String
   createdAt DateTime @default(now())
 
