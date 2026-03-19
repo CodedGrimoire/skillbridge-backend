@@ -19,6 +19,7 @@ const trendRoutes = require('./routes/trendRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 const capabilityRoutes = require('./routes/capabilityRoutes');
 const mentorRoutes = require('./routes/mentorRoutes');
+const roadmapRoutes = require('./routes/roadmap.routes');
 const { prisma } = require('./config/db');
 
 const app = express();
@@ -47,6 +48,7 @@ app.use('/api/career', careerRoutes);
 app.use('/api/trends', trendRoutes);
 app.use('/api/capability', capabilityRoutes);
 app.use('/api/mentor', mentorRoutes);
+app.use('/api/roadmap', roadmapRoutes);
 
 // Error handling
 app.use(errorHandler);
