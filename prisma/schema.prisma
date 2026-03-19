@@ -40,6 +40,8 @@ model User {
   mentorMeetings     MentorMeeting[]      @relation("MentorMeetings")
   menteeMeetings     MentorMeeting[]      @relation("MenteeMeetings")
   careerVisionPlans  CareerVisionPlan[]
+  tasksCreated       Task[]               @relation("MentorTasks")
+  assignments        Assignment[]
 }
 
 model Resume {
@@ -281,6 +283,40 @@ model CareerVisionPlan {
 
   @@unique([userId, role])
   @@index([userId])
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  title       String
+  description String
+  deadline    DateTime
+  difficulty  String
+  mentorId    String
+  mentor      User         @relation("MentorTasks", fields: [mentorId], references: [id])
+  assignments Assignment[]
+  createdAt   DateTime     @default(now())
+}
+
+model Assignment {
+  id         String      @id @default(uuid())
+  taskId     String
+  userId     String
+  status     String      @default("pending") // pending | submitted | approved | rejected
+  task       Task        @relation(fields: [taskId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+  submission Submission?
+
+  @@index([taskId])
+  @@index([userId])
+}
+
+model Submission {
+  id           String      @id @default(uuid())
+  assignmentId String      @unique
+  link         String
+  feedback     String?
+  submittedAt  DateTime    @default(now())
+  assignment   Assignment  @relation(fields: [assignmentId], references: [id])
 }
 
 model Job {
