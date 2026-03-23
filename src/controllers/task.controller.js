@@ -37,6 +37,7 @@ const getMentorTasks = async (req, res, next) => {
       include: {
         assignments: {
           include: { user: true, submission: true },
+          orderBy: { id: 'desc' },
         },
       },
     });
@@ -52,7 +53,7 @@ const getUserTasks = async (req, res, next) => {
     const { userId } = req.params;
     const assignments = await prisma.assignment.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { id: 'desc' },
       include: { task: true, submission: true },
     });
     res.json(assignments);

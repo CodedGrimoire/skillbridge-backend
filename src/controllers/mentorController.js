@@ -44,6 +44,19 @@ const listRequestsForMentor = async (req, res, next) => {
   }
 };
 
+// List accepted mentees for the authenticated mentor
+const listMentees = async (req, res, next) => {
+  try {
+    const data = await prisma.mentorRequest.findMany({
+      where: { mentorId: req.user.id, status: 'accepted' },
+      include: { user: { select: { id: true, name: true, email: true } } },
+    });
+    res.json(data.map((m) => m.user));
+  } catch (err) {
+    next(err);
+  }
+};
+
 const updateRequestStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -291,6 +304,7 @@ module.exports = {
   listMentors,
   createRequest,
   listRequestsForMentor,
+  listMentees,
   updateRequestStatus,
   deleteUser,
   getUserSkillProfile,

@@ -4,6 +4,7 @@ const {
   listMentors,
   createRequest,
   listRequestsForMentor,
+  listMentees,
   updateRequestStatus,
   deleteUser,
   getUserSkillProfile,
@@ -24,6 +25,7 @@ router.get('/mentors', authenticateToken, listMentors);
 router.post('/requests', authenticateToken, createRequest);
 router.get('/requests', authenticateToken, authorizeRoles('ADMIN'), listRequestsForMentor);
 router.put('/requests/:id', authenticateToken, authorizeRoles('ADMIN'), updateRequestStatus);
+router.get('/mentees', authenticateToken, authorizeRoles('ADMIN'), listMentees);
 
 router.delete('/users/:id', authenticateToken, authorizeRoles('ADMIN'), deleteUser);
 router.get('/users/:id/skills', authenticateToken, authorizeRoles('ADMIN'), getUserSkillProfile);
