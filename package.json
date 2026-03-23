@@ -27,6 +27,7 @@
     "pdf-parse": "^1.1.1",
     "pg": "^8.20.0",
     "pg-copy-streams": "^7.0.0",
+    "stripe": "^16.6.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

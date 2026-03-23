@@ -21,12 +21,15 @@ const capabilityRoutes = require('./routes/capabilityRoutes');
 const mentorRoutes = require('./routes/mentorRoutes');
 const roadmapRoutes = require('./routes/roadmap.routes');
 const taskRoutes = require('./routes/task.routes');
+const courseRoutes = require('./routes/course.routes');
+const paymentRoutes = require('./routes/payment.routes');
 const { prisma } = require('./config/db');
 
 const app = express();
 
 // Global middleware
 app.use(cors());
+
 app.use(express.json());
 
 // Health check
@@ -51,6 +54,8 @@ app.use('/api/capability', capabilityRoutes);
 app.use('/api/mentor', mentorRoutes);
 app.use('/api/roadmap', roadmapRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Error handling
 app.use(errorHandler);

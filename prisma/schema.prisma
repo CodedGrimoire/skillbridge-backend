@@ -42,6 +42,8 @@ model User {
   careerVisionPlans  CareerVisionPlan[]
   tasksCreated       Task[]               @relation("MentorTasks")
   assignments        Assignment[]
+  coursesCreated     Course[]             @relation("MentorCourses")
+  purchases          Purchase[]
 }
 
 model Resume {
@@ -296,6 +298,32 @@ model Task {
   mentor      User         @relation("MentorTasks", fields: [mentorId], references: [id])
   assignments Assignment[]
   createdAt   DateTime     @default(now())
+}
+
+model Course {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  price       Int
+  mentorId    String
+  mentor      User       @relation("MentorCourses", fields: [mentorId], references: [id])
+  purchases   Purchase[]
+  createdAt   DateTime   @default(now())
+
+  @@index([mentorId])
+}
+
+model Purchase {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  user      User     @relation(fields: [userId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([courseId])
+  @@unique([userId, courseId])
 }
 
 model Assignment {
