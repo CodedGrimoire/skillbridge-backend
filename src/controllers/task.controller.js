@@ -3,7 +3,7 @@ const { prisma } = require('../config/db');
 // POST /api/tasks
 const createTask = async (req, res, next) => {
   try {
-    const { title, description, deadline, difficulty, mentorId, assignedUserIds = [] } = req.body;
+    const { title, description, deadline, difficulty, fullMarks = 100, mentorId, assignedUserIds = [] } = req.body;
     if (!title || !description || !deadline || !difficulty || !mentorId) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -14,6 +14,7 @@ const createTask = async (req, res, next) => {
         description,
         deadline: new Date(deadline),
         difficulty,
+        fullMarks: Number(fullMarks),
         mentorId,
         assignments: {
           create: assignedUserIds.map((userId) => ({ userId })),

@@ -291,6 +291,7 @@ model Task {
   description String
   deadline    DateTime
   difficulty  String
+  fullMarks   Int           @default(100)
   mentorId    String
   mentor      User         @relation("MentorTasks", fields: [mentorId], references: [id])
   assignments Assignment[]
