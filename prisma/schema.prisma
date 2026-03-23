@@ -310,6 +310,7 @@ model Course {
   purchases   Purchase[]
   createdAt   DateTime   @default(now())
 
+  @@unique([title, mentorId])
   @@index([mentorId])
 }
 

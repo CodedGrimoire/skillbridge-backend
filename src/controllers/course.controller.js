@@ -25,6 +25,21 @@ const listCourses = async (_req, res, next) => {
   }
 };
 
+const listPurchasedCourses = async (req, res, next) => {
+  try {
+    const purchases = await prisma.purchase.findMany({
+      where: { userId: req.user.id },
+      include: {
+        course: { include: { mentor: { select: { id: true, name: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(purchases.map((p) => p.course));
+  } catch (err) {
+    next(err);
+  }
+};
+
 const deleteCourse = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -35,4 +50,4 @@ const deleteCourse = async (req, res, next) => {
   }
 };
 
-module.exports = { createCourse, listCourses, deleteCourse };
+module.exports = { createCourse, listCourses, listPurchasedCourses, deleteCourse };

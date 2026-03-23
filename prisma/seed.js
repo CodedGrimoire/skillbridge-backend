@@ -130,6 +130,38 @@ async function seed() {
       create: { name: u.name, email: u.email, password: passwordHash, role: u.role },
     });
   }
+
+  console.log('Seeding Courses for mentors...');
+  const mentor1 = await prisma.user.findUnique({ where: { email: 'mentor1@example.com' } });
+  const mentor2 = await prisma.user.findUnique({ where: { email: 'mentor2@example.com' } });
+  const courses = [
+    {
+      title: 'Frontend Foundations with React',
+      description: 'Build production-grade UIs with React, hooks, and modern patterns.',
+      price: 9900,
+      mentorId: mentor1?.id,
+    },
+    {
+      title: 'Backend APIs with Node & Prisma',
+      description: 'Design, build, and ship secure REST APIs using Node.js, Express, and Prisma.',
+      price: 10900,
+      mentorId: mentor1?.id,
+    },
+    {
+      title: 'DevOps for Web Teams',
+      description: 'Practical Docker, CI/CD, and deployment strategies for web engineers.',
+      price: 12900,
+      mentorId: mentor2?.id,
+    },
+  ].filter((c) => c.mentorId);
+
+  for (const c of courses) {
+    await prisma.course.upsert({
+      where: { title_mentorId: { title: c.title, mentorId: c.mentorId } },
+      update: { description: c.description, price: c.price },
+      create: c,
+    });
+  }
 }
 
 seed()
